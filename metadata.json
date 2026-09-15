@@ -1,0 +1,6 @@
+{
+  "name": "Bakery Manager",
+  "description": "Modern AI-powered bakery operations and production management application with intelligent task organization, order tracking, and shift analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
