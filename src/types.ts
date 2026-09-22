@@ -75,3 +75,35 @@ export interface OvenStatus {
 }
 
 export type ActiveTab = 'dashboard' | 'tasks' | 'projects' | 'analytics' | 'assistant';
+
+export interface NaturalLanguageSearchFilter {
+  station?: string;
+  status?: string;
+  priority?: string;
+  assignedBaker?: string;
+  minEstimatedMinutes?: number;
+  maxEstimatedMinutes?: number;
+  timeframe?: string;
+}
+
+export interface TaskSearchResult {
+  task: BakeryTask;
+  relevanceScore: number;
+  matchReason: string;
+}
+
+export interface ProjectSearchResult {
+  project: Project;
+  relevanceScore: number;
+  matchReason: string;
+}
+
+export interface NaturalLanguageSearchResponse {
+  query: string;
+  interpretation: string;
+  extractedFilters: NaturalLanguageSearchFilter;
+  matchingTasks: TaskSearchResult[];
+  matchingProjects: ProjectSearchResult[];
+  suggestedFollowUps?: string[];
+  isAiPowered: boolean;
+}

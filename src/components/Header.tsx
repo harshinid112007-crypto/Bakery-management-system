@@ -12,8 +12,10 @@ import {
   Flame,
   Clock,
   X,
+  Database,
 } from 'lucide-react';
 import { ActiveTab, BakeryTask, Project } from '../types';
+import { DatabaseHealth } from '../services/api';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -26,6 +28,9 @@ interface HeaderProps {
   isAiDrawerOpen: boolean;
   tasks: BakeryTask[];
   projects: Project[];
+  dbHealth: DatabaseHealth | null;
+  onOpenDbModal: () => void;
+  onOpenAiSearch: (initialQuery?: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -37,6 +42,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNewProject,
   onToggleAiDrawer,
   tasks,
+  dbHealth,
+  onOpenDbModal,
+  onOpenAiSearch,
 }) => {
   const completedCount = tasks.filter((t) => t.status === 'completed').length;
   const totalCount = tasks.length;
@@ -77,29 +85,80 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Global Search Bar */}
           <div className="flex-1 max-w-md hidden md:block">
-            <div className="relative">
+            <div className="relative flex items-center">
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 id="global-search-input"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search batches, breads, pastries, orders..."
-                className="w-full bg-stone-800/90 text-sm text-stone-200 placeholder-stone-400 pl-9 pr-8 py-2 rounded-lg border border-stone-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    onOpenAiSearch(searchQuery);
+                  }
+                }}
+                placeholder="Search batches, breads, or ask AI e.g. 'urgent tasks'..."
+                className="w-full bg-stone-800/90 text-sm text-stone-200 placeholder-stone-400 pl-9 pr-24 py-2 rounded-lg border border-stone-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
               />
-              {searchQuery && (
+              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-stone-400 hover:text-stone-200 p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-200"
+                  id="header-ai-search-btn"
+                  onClick={() => onOpenAiSearch(searchQuery)}
+                  title="Natural Language Record Search Assistant (Gemini)"
+                  className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold transition-colors cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>AI Search</span>
                 </button>
-              )}
+              </div>
             </div>
           </div>
 
           {/* Right Status & Actions */}
           <div className="flex items-center gap-2.5">
+            {/* Mobile AI Search Button */}
+            <button
+              id="header-mobile-ai-search-btn"
+              onClick={() => onOpenAiSearch(searchQuery)}
+              className="md:hidden flex items-center justify-center p-2 rounded-lg bg-stone-800 border border-stone-700 text-amber-400 hover:bg-stone-700 transition-colors"
+              title="AI Record Search"
+            >
+              <Sparkles className="w-4 h-4" />
+            </button>
+            {/* Database Status Button */}
+            <button
+              id="header-database-btn"
+              onClick={onOpenDbModal}
+              title={dbHealth?.message || 'Supabase PostgreSQL Status'}
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                dbHealth?.connected
+                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60'
+                  : dbHealth?.configured
+                  ? 'bg-amber-950/60 border-amber-500/40 text-amber-300 hover:bg-amber-900/60'
+                  : 'bg-stone-800/80 border-stone-700 text-stone-300 hover:bg-stone-700/80'
+              }`}
+            >
+              <Database className={`w-3.5 h-3.5 ${dbHealth?.connected ? 'text-emerald-400' : 'text-amber-400'}`} />
+              <span>{dbHealth?.connected ? 'Supabase Live' : 'Supabase PG'}</span>
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  dbHealth?.connected
+                    ? 'bg-emerald-400 animate-pulse'
+                    : dbHealth?.configured
+                    ? 'bg-amber-400'
+                    : 'bg-stone-400'
+                }`}
+              />
+            </button>
+
             {/* Shift Progress Pill */}
             <div className="hidden lg:flex items-center gap-2 bg-stone-800/80 px-3 py-1.5 rounded-lg border border-stone-700/60 text-xs">
               <Clock className="w-3.5 h-3.5 text-amber-400" />

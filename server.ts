@@ -1,8 +1,25 @@
 import express, { Request, Response } from "express";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import type { BakeryTask, Project } from "./src/types";
+import {
+  getProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+  getOvens,
+  updateOven,
+  seedDatabase,
+  getDatabaseHealth,
+  isSupabaseConfigured,
+} from "./server/supabase";
 
 dotenv.config();
 
@@ -32,8 +49,149 @@ app.get("/api/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",
     hasApiKey: Boolean(process.env.GEMINI_API_KEY),
+    supabaseConfigured: isSupabaseConfigured(),
     time: new Date().toISOString(),
   });
+});
+
+// -----------------------------------------------------------------------------
+// Supabase Database & Health Endpoints
+// -----------------------------------------------------------------------------
+app.get("/api/db/status", async (_req: Request, res: Response) => {
+  try {
+    const health = await getDatabaseHealth();
+    res.json(health);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to inspect database health" });
+  }
+});
+
+app.post("/api/db/seed", async (_req: Request, res: Response) => {
+  try {
+    const result = await seedDatabase();
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to seed database" });
+  }
+});
+
+app.get("/api/db/schema", (_req: Request, res: Response) => {
+  try {
+    const schemaPath = path.join(process.cwd(), "supabase", "schema.sql");
+    if (fs.existsSync(schemaPath)) {
+      const sql = fs.readFileSync(schemaPath, "utf-8");
+      res.type("text/plain").send(sql);
+    } else {
+      res.status(404).send("-- Schema file not found");
+    }
+  } catch (err: any) {
+    res.status(500).send(`-- Error reading schema: ${err.message}`);
+  }
+});
+
+// -----------------------------------------------------------------------------
+// Tasks CRUD Endpoints (Connected to Supabase PostgreSQL)
+// -----------------------------------------------------------------------------
+app.get("/api/tasks", async (_req: Request, res: Response) => {
+  try {
+    const tasks = await getTasks();
+    res.json(tasks);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch tasks" });
+  }
+});
+
+app.post("/api/tasks", async (req: Request, res: Response) => {
+  try {
+    const created = await createTask(req.body);
+    res.status(201).json(created);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to create task" });
+  }
+});
+
+app.put("/api/tasks/:id", async (req: Request, res: Response) => {
+  try {
+    const updated = await updateTask(req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to update task" });
+  }
+});
+
+app.delete("/api/tasks/:id", async (req: Request, res: Response) => {
+  try {
+    const success = await deleteTask(req.params.id);
+    res.json({ success });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to delete task" });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// Projects CRUD Endpoints (Connected to Supabase PostgreSQL)
+// -----------------------------------------------------------------------------
+app.get("/api/projects", async (_req: Request, res: Response) => {
+  try {
+    const projects = await getProjects();
+    res.json(projects);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch projects" });
+  }
+});
+
+app.post("/api/projects", async (req: Request, res: Response) => {
+  try {
+    const created = await createProject(req.body);
+    res.status(201).json(created);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to create project" });
+  }
+});
+
+app.put("/api/projects/:id", async (req: Request, res: Response) => {
+  try {
+    const updated = await updateProject(req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to update project" });
+  }
+});
+
+app.delete("/api/projects/:id", async (req: Request, res: Response) => {
+  try {
+    const success = await deleteProject(req.params.id);
+    res.json({ success });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to delete project" });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// Ovens Telemetry Endpoints (Connected to Supabase PostgreSQL)
+// -----------------------------------------------------------------------------
+app.get("/api/ovens", async (_req: Request, res: Response) => {
+  try {
+    const ovens = await getOvens();
+    res.json(ovens);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch ovens" });
+  }
+});
+
+app.put("/api/ovens/:id", async (req: Request, res: Response) => {
+  try {
+    const updated = await updateOven(req.params.id, req.body);
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to update oven" });
+  }
 });
 
 // Chat endpoint with contextual bakery awareness
@@ -205,6 +363,368 @@ Be specific and professional with a warm artisan tone.`;
     });
   }
 });
+
+// -----------------------------------------------------------------------------
+// AI-Powered Natural Language Record Search Endpoint
+// -----------------------------------------------------------------------------
+app.post("/api/ai/natural-search", async (req: Request, res: Response) => {
+  try {
+    const { query } = req.body;
+
+    if (!query || typeof query !== "string" || !query.trim()) {
+      return res.status(400).json({ error: "Search query is required" });
+    }
+
+    const cleanQuery = query.trim();
+
+    // Retrieve active records (from request body or database)
+    let tasks: BakeryTask[] = Array.isArray(req.body.tasks) && req.body.tasks.length > 0 ? req.body.tasks : [];
+    let projects: Project[] = Array.isArray(req.body.projects) && req.body.projects.length > 0 ? req.body.projects : [];
+
+    if (tasks.length === 0) {
+      tasks = await getTasks();
+    }
+    if (projects.length === 0) {
+      projects = await getProjects();
+    }
+
+    const ai = getGeminiClient();
+
+    if (!ai) {
+      const fallbackResult = performFallbackNaturalSearch(cleanQuery, tasks, projects);
+      return res.json(fallbackResult);
+    }
+
+    // Prepare token-optimized summary representation of records
+    const tasksContext = tasks.map((t) => ({
+      id: t.id,
+      title: t.title,
+      desc: t.description,
+      station: t.station,
+      priority: t.priority,
+      status: t.status,
+      due: t.dueTime,
+      minutes: t.estimatedMinutes,
+      baker: t.assignedBaker,
+      tags: t.tags || [],
+      oven: t.ovenSlot || "",
+    }));
+
+    const projectsContext = projects.map((p) => ({
+      id: p.id,
+      name: p.name,
+      client: p.client || "",
+      deadline: p.deadline,
+      status: p.status,
+      targetUnits: p.targetUnits,
+      lead: p.assignedLead,
+      category: p.category,
+    }));
+
+    const systemPrompt = `You are the AI Search & Retrieval Specialist for the Crumb & Crust Bakery Management System.
+Analyze the user's natural language search query against active bakery records (tasks and wholesale orders/projects).
+Match relevant records based on semantics, station keywords, priority words, baker names, baking stages (prep, proofing, baking, finishing, completed), time horizons, and ingredients (sourdough, croissant, brioche, cake, focaccia).
+
+Available Tasks:
+${JSON.stringify(tasksContext, null, 2)}
+
+Available Projects / Orders:
+${JSON.stringify(projectsContext, null, 2)}
+
+Return ONLY valid JSON matching this schema:
+{
+  "interpretation": "Short 1-sentence summary of what the query is looking for",
+  "extractedFilters": {
+    "station": "Specific station name or 'ALL'",
+    "status": "Specific status (prep/proofing/baking/finishing/completed) or 'ALL'",
+    "priority": "Specific priority (Urgent/High/Medium/Low) or 'ALL'",
+    "assignedBaker": "Specific baker name or 'ALL'",
+    "minEstimatedMinutes": null,
+    "maxEstimatedMinutes": null,
+    "timeframe": "Optional timeframe note"
+  },
+  "matchingTasks": [
+    {
+      "taskId": "task-id",
+      "relevanceScore": 95,
+      "matchReason": "Why this task matches the query"
+    }
+  ],
+  "matchingProjects": [
+    {
+      "projectId": "proj-id",
+      "relevanceScore": 90,
+      "matchReason": "Why this project matches the query"
+    }
+  ],
+  "suggestedFollowUps": [
+    "Suggested natural query 1",
+    "Suggested natural query 2"
+  ]
+}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.8-flash",
+      contents: `User Natural Language Search Query: "${cleanQuery}"`,
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      },
+    });
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(response.text?.trim() || "{}");
+    } catch (parseErr) {
+      console.warn("Failed to parse Gemini natural search JSON, using fallback:", parseErr);
+      const fallbackResult = performFallbackNaturalSearch(cleanQuery, tasks, projects);
+      return res.json(fallbackResult);
+    }
+
+    const tasksMap = new Map(tasks.map((t) => [t.id, t]));
+    const projectsMap = new Map(projects.map((p) => [p.id, p]));
+
+    const matchingTasks = (Array.isArray(parsed.matchingTasks) ? parsed.matchingTasks : [])
+      .filter((m: any) => m && m.taskId && tasksMap.has(m.taskId))
+      .map((m: any) => ({
+        task: tasksMap.get(m.taskId)!,
+        relevanceScore: typeof m.relevanceScore === "number" ? Math.min(100, Math.max(10, m.relevanceScore)) : 85,
+        matchReason: m.matchReason || "Matched search criteria",
+      }))
+      .sort((a: any, b: any) => b.relevanceScore - a.relevanceScore);
+
+    const matchingProjects = (Array.isArray(parsed.matchingProjects) ? parsed.matchingProjects : [])
+      .filter((m: any) => m && m.projectId && projectsMap.has(m.projectId))
+      .map((m: any) => ({
+        project: projectsMap.get(m.projectId)!,
+        relevanceScore: typeof m.relevanceScore === "number" ? Math.min(100, Math.max(10, m.relevanceScore)) : 80,
+        matchReason: m.matchReason || "Matched order criteria",
+      }))
+      .sort((a: any, b: any) => b.relevanceScore - a.relevanceScore);
+
+    return res.json({
+      query: cleanQuery,
+      interpretation: parsed.interpretation || `Search results for "${cleanQuery}"`,
+      extractedFilters: parsed.extractedFilters || {},
+      matchingTasks,
+      matchingProjects,
+      suggestedFollowUps: parsed.suggestedFollowUps || [
+        "What tasks are currently in the ovens?",
+        "Show urgent tasks for Chef Marcus",
+        "Wholesale orders due today",
+      ],
+      isAiPowered: true,
+    });
+  } catch (error: any) {
+    console.error("Gemini Natural Search error, using smart fallback:", error);
+    const tasks = req.body.tasks || (await getTasks());
+    const projects = req.body.projects || (await getProjects());
+    const fallback = performFallbackNaturalSearch(req.body.query || "", tasks, projects);
+    return res.json(fallback);
+  }
+});
+
+// Heuristic fallback search parser when offline or API key is absent
+function performFallbackNaturalSearch(query: string, tasks: BakeryTask[], projects: Project[]) {
+  const q = query.toLowerCase();
+  const tokens = q.split(/\s+/).filter(Boolean);
+
+  const extractedFilters: any = {
+    station: "ALL",
+    status: "ALL",
+    priority: "ALL",
+    assignedBaker: "ALL",
+  };
+
+  // Detect station
+  if (q.includes("bread") || q.includes("sourdough") || q.includes("batard") || q.includes("baguette") || q.includes("focaccia")) {
+    extractedFilters.station = "Breads";
+  } else if (q.includes("croissant") || q.includes("viennoiserie") || q.includes("pastry") || q.includes("chocolat") || q.includes("lamination")) {
+    extractedFilters.station = "Viennoiserie";
+  } else if (q.includes("cake") || q.includes("sponge") || q.includes("wedding") || q.includes("tier")) {
+    extractedFilters.station = "Custom Cakes";
+  } else if (q.includes("prep") || q.includes("autolyse") || q.includes("dough") || q.includes("mix")) {
+    extractedFilters.station = "Prep & Doughs";
+  } else if (q.includes("oven") || q.includes("deck") || q.includes("rack") || q.includes("bake") || q.includes("steam")) {
+    extractedFilters.station = "Ovens";
+  } else if (q.includes("finish") || q.includes("pack") || q.includes("box") || q.includes("dispatch")) {
+    extractedFilters.station = "Finishing & Packaging";
+  }
+
+  // Detect status
+  if (q.includes("proofing") || q.includes("proof") || q.includes("retard")) {
+    extractedFilters.status = "proofing";
+  } else if (q.includes("baking") || q.includes("in oven")) {
+    extractedFilters.status = "baking";
+  } else if (q.includes("prep") || q.includes("preparing")) {
+    extractedFilters.status = "prep";
+  } else if (q.includes("finishing") || q.includes("decorat")) {
+    extractedFilters.status = "finishing";
+  } else if (q.includes("completed") || q.includes("done") || q.includes("finished") || q.includes("ready")) {
+    extractedFilters.status = "completed";
+  }
+
+  // Detect priority
+  if (q.includes("urgent") || q.includes("asap") || q.includes("rush")) {
+    extractedFilters.priority = "Urgent";
+  } else if (q.includes("high")) {
+    extractedFilters.priority = "High";
+  } else if (q.includes("medium")) {
+    extractedFilters.priority = "Medium";
+  } else if (q.includes("low")) {
+    extractedFilters.priority = "Low";
+  }
+
+  // Detect baker
+  if (q.includes("marcus")) {
+    extractedFilters.assignedBaker = "Chef Marcus";
+  } else if (q.includes("sophie")) {
+    extractedFilters.assignedBaker = "Baker Sophie";
+  } else if (q.includes("claire")) {
+    extractedFilters.assignedBaker = "Pastry Chef Claire";
+  } else if (q.includes("leo")) {
+    extractedFilters.assignedBaker = "Chef Leo";
+  }
+
+  // Score Tasks
+  const scoredTasks = tasks.map((task) => {
+    let score = 0;
+    const reasons: string[] = [];
+    const tTitle = task.title.toLowerCase();
+    const tDesc = task.description.toLowerCase();
+    const tStation = task.station.toLowerCase();
+    const tBaker = task.assignedBaker.toLowerCase();
+    const tTags = (task.tags || []).join(" ").toLowerCase();
+
+    // Priority matching
+    if (extractedFilters.priority !== "ALL") {
+      if (task.priority === extractedFilters.priority) {
+        score += 35;
+        reasons.push(`${task.priority} priority`);
+      }
+    }
+
+    // Status matching
+    if (extractedFilters.status !== "ALL") {
+      if (task.status === extractedFilters.status) {
+        score += 35;
+        reasons.push(`in '${task.status}' stage`);
+      }
+    }
+
+    // Station matching
+    if (extractedFilters.station !== "ALL") {
+      if (task.station === extractedFilters.station) {
+        score += 30;
+        reasons.push(`at ${task.station} station`);
+      }
+    }
+
+    // Baker matching
+    if (extractedFilters.assignedBaker !== "ALL") {
+      if (task.assignedBaker.toLowerCase().includes(extractedFilters.assignedBaker.toLowerCase())) {
+        score += 35;
+        reasons.push(`assigned to ${task.assignedBaker}`);
+      }
+    }
+
+    // Token matching across text
+    let tokenMatches = 0;
+    for (const token of tokens) {
+      if (token.length <= 2) continue;
+      if (tTitle.includes(token)) {
+        score += 20;
+        tokenMatches++;
+      } else if (tDesc.includes(token) || tTags.includes(token)) {
+        score += 12;
+        tokenMatches++;
+      } else if (tStation.includes(token) || tBaker.includes(token)) {
+        score += 10;
+        tokenMatches++;
+      }
+    }
+
+    if (tokenMatches > 0 && reasons.length === 0) {
+      reasons.push(`mentions '${tokens.slice(0, 3).join(", ")}'`);
+    }
+
+    // Duration keywords
+    if (q.includes("quick") || q.includes("short") || q.includes("< 30") || q.includes("under 30")) {
+      if (task.estimatedMinutes <= 30) {
+        score += 20;
+        reasons.push(`quick turnaround (${task.estimatedMinutes}m)`);
+      }
+    }
+
+    return {
+      task,
+      relevanceScore: Math.min(99, Math.max(10, score)),
+      matchReason: reasons.length > 0 ? reasons.join(", ") : "Text match in task records",
+    };
+  });
+
+  const matchingTasks = scoredTasks
+    .filter((st) => st.relevanceScore >= 30)
+    .sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+  // Score Projects
+  const scoredProjects = projects.map((project) => {
+    let score = 0;
+    const reasons: string[] = [];
+    const pName = project.name.toLowerCase();
+    const pClient = (project.client || "").toLowerCase();
+    const pDesc = project.description.toLowerCase();
+    const pLead = project.assignedLead.toLowerCase();
+
+    if (extractedFilters.assignedBaker !== "ALL" && pLead.includes(extractedFilters.assignedBaker.toLowerCase())) {
+      score += 35;
+      reasons.push(`led by ${project.assignedLead}`);
+    }
+
+    if (q.includes("order") || q.includes("wholesale") || q.includes("client") || q.includes("project")) {
+      score += 25;
+      reasons.push("wholesale / event order record");
+    }
+
+    for (const token of tokens) {
+      if (token.length <= 2) continue;
+      if (pName.includes(token) || pClient.includes(token)) {
+        score += 25;
+        reasons.push(`matches client or title`);
+      } else if (pDesc.includes(token)) {
+        score += 15;
+      }
+    }
+
+    return {
+      project,
+      relevanceScore: Math.min(99, Math.max(10, score)),
+      matchReason: reasons.length > 0 ? reasons.join(", ") : "Matched project parameters",
+    };
+  });
+
+  const matchingProjects = scoredProjects
+    .filter((sp) => sp.relevanceScore >= 30)
+    .sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+  const interpretation = `Filtered bakery records based on query criteria (Station: ${extractedFilters.station}, Priority: ${extractedFilters.priority}, Status: ${extractedFilters.status})`;
+
+  return {
+    query,
+    interpretation,
+    extractedFilters,
+    matchingTasks,
+    matchingProjects,
+    suggestedFollowUps: [
+      "What tasks are currently in the ovens?",
+      "Show urgent tasks for Chef Marcus",
+      "Wholesale orders due today",
+      "Viennoiserie proofing tasks",
+    ],
+    isAiPowered: false,
+  };
+}
 
 // Offline intelligent bakery assistant logic
 function generateOfflineBakeryReply(message: string, context: any): string {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Plus,
   Clock,
@@ -12,8 +12,9 @@ import {
   Sparkles,
   Tag,
   CheckSquare,
+  X,
 } from 'lucide-react';
-import { BakeryTask, TaskStatus, Station, TaskPriority, Project } from '../types';
+import { BakeryTask, TaskStatus, Station, TaskPriority, Project, NaturalLanguageSearchFilter } from '../types';
 import { BAKERY_STATIONS, BAKERS } from '../data/initialData';
 
 interface TaskManagerViewProps {
@@ -25,6 +26,9 @@ interface TaskManagerViewProps {
   onDeleteTask: (taskId: string) => void;
   onOpenNewTask: (initialStatus?: TaskStatus) => void;
   onTriggerAiAction: (actionType: string) => void;
+  onOpenAiSearch?: () => void;
+  appliedAiFilters?: NaturalLanguageSearchFilter | null;
+  onClearAiFilters?: () => void;
 }
 
 const COLUMNS: { id: TaskStatus; label: string; description: string; color: string }[] = [
@@ -44,12 +48,30 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
   onDeleteTask: _onDeleteTask,
   onOpenNewTask,
   onTriggerAiAction,
+  onOpenAiSearch,
+  appliedAiFilters,
+  onClearAiFilters,
 }) => {
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [selectedStation, setSelectedStation] = useState<Station | 'ALL'>('ALL');
   const [selectedPriority, setSelectedPriority] = useState<TaskPriority | 'ALL'>('ALL');
   const [selectedProject, setSelectedProject] = useState<string>('ALL');
   const [selectedBaker, setSelectedBaker] = useState<string>('ALL');
+
+  // Synchronize applied AI filters from natural language search
+  useEffect(() => {
+    if (appliedAiFilters) {
+      if (appliedAiFilters.station && appliedAiFilters.station !== 'ALL') {
+        setSelectedStation(appliedAiFilters.station as Station);
+      }
+      if (appliedAiFilters.priority && appliedAiFilters.priority !== 'ALL') {
+        setSelectedPriority(appliedAiFilters.priority as TaskPriority);
+      }
+      if (appliedAiFilters.assignedBaker && appliedAiFilters.assignedBaker !== 'ALL') {
+        setSelectedBaker(appliedAiFilters.assignedBaker);
+      }
+    }
+  }, [appliedAiFilters]);
 
   // Filter tasks
   const filteredTasks = useMemo(() => {
@@ -166,6 +188,19 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
               <span className="hidden sm:inline">AI Batch Plan</span>
             </button>
 
+            {/* AI Natural Language Search */}
+            {onOpenAiSearch && (
+              <button
+                id="task-manager-ai-search-btn"
+                onClick={onOpenAiSearch}
+                className="flex items-center gap-1.5 bg-amber-600/10 hover:bg-amber-600/20 text-amber-900 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                title="Search records with natural language"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span className="hidden sm:inline">AI Search</span>
+              </button>
+            )}
+
             {/* Add Task */}
             <button
               id="kanban-new-task-btn"
@@ -254,6 +289,34 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
             Showing {filteredTasks.length} of {tasks.length} tasks
           </div>
         </div>
+
+        {/* Applied AI Search Filter Banner */}
+        {appliedAiFilters && (
+          <div className="mt-3 pt-3 border-t border-stone-200 flex items-center justify-between bg-amber-50/80 border border-amber-200/90 px-3.5 py-2 rounded-xl text-xs text-amber-950">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span className="font-bold">Active AI Filter:</span>
+              <span className="text-stone-700">
+                {[
+                  appliedAiFilters.station && appliedAiFilters.station !== 'ALL' && `Station: ${appliedAiFilters.station}`,
+                  appliedAiFilters.priority && appliedAiFilters.priority !== 'ALL' && `Priority: ${appliedAiFilters.priority}`,
+                  appliedAiFilters.assignedBaker && appliedAiFilters.assignedBaker !== 'ALL' && `Baker: ${appliedAiFilters.assignedBaker}`,
+                  appliedAiFilters.status && appliedAiFilters.status !== 'ALL' && `Stage: ${appliedAiFilters.status}`,
+                ].filter(Boolean).join(' • ') || 'Custom criteria applied'}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                clearFilters();
+                onClearAiFilters?.();
+              }}
+              className="text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer ml-2 shrink-0 underline"
+            >
+              <X className="w-3 h-3" />
+              <span>Clear Filter</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* View Mode: Kanban */}

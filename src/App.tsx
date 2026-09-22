@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
 import { TaskManagerView } from './components/TaskManagerView';
@@ -8,9 +8,26 @@ import { AiAssistant } from './components/AiAssistant';
 import { AiChatDrawer } from './components/AiChatDrawer';
 import { TaskModal } from './components/TaskModal';
 import { ProjectModal } from './components/ProjectModal';
-import { ActiveTab, BakeryTask, Project, OvenStatus, TaskStatus } from './types';
+import { DatabaseModal } from './components/DatabaseModal';
+import { NaturalLanguageSearchModal } from './components/NaturalLanguageSearchModal';
+import { ActiveTab, BakeryTask, Project, OvenStatus, TaskStatus, NaturalLanguageSearchFilter } from './types';
 import { INITIAL_TASKS, INITIAL_PROJECTS, INITIAL_OVENS, BAKERS } from './data/initialData';
-import { Sparkles, RotateCcw } from 'lucide-react';
+import {
+  fetchTasks,
+  createTask as apiCreateTask,
+  updateTask as apiUpdateTask,
+  deleteTask as apiDeleteTask,
+  fetchProjects,
+  createProject as apiCreateProject,
+  updateProject as apiUpdateProject,
+  deleteProject as apiDeleteProject,
+  fetchOvens,
+  fetchDatabaseHealth,
+  seedDatabase,
+  fetchSchemaSql,
+  DatabaseHealth,
+} from './services/api';
+import { Sparkles, RotateCcw, Database } from 'lucide-react';
 
 const LOCAL_STORAGE_TASKS_KEY = 'crumb_and_crust_tasks_v1';
 const LOCAL_STORAGE_PROJECTS_KEY = 'crumb_and_crust_projects_v1';
@@ -20,7 +37,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Core Data State (Initialized from LocalStorage or defaults)
+  // Core Data State (with safe initial fallback)
   const [tasks, setTasks] = useState<BakeryTask[]>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_TASKS_KEY);
@@ -41,7 +58,12 @@ export default function App() {
     return INITIAL_PROJECTS;
   });
 
-  const [ovens] = useState<OvenStatus[]>(INITIAL_OVENS);
+  const [ovens, setOvens] = useState<OvenStatus[]>(INITIAL_OVENS);
+
+  // Database Connection & Sync State
+  const [dbHealth, setDbHealth] = useState<DatabaseHealth | null>(null);
+  const [isDbModalOpen, setIsDbModalOpen] = useState(false);
+  const [schemaSql, setSchemaSql] = useState<string>('');
 
   // AI Drawer & Triggers
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
@@ -56,6 +78,24 @@ export default function App() {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  // AI Natural Language Search State
+  const [isAiSearchOpen, setIsAiSearchOpen] = useState(false);
+  const [aiSearchInitialQuery, setAiSearchInitialQuery] = useState('');
+  const [appliedAiFilters, setAppliedAiFilters] = useState<NaturalLanguageSearchFilter | null>(null);
+
+  const handleOpenAiSearch = (initialQuery?: string) => {
+    setAiSearchInitialQuery(initialQuery || '');
+    setIsAiSearchOpen(true);
+  };
+
+  const handleApplyAiFiltersToBoard = (filters: NaturalLanguageSearchFilter) => {
+    setAppliedAiFilters(filters);
+    setActiveTab('tasks');
+    showToast(
+      `AI search filter applied: ${filters.station || filters.priority || filters.assignedBaker || 'Custom filters'}`
+    );
+  };
+
   // Micro-toast notifications
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -66,12 +106,58 @@ export default function App() {
     }, 3500);
   };
 
-  // Sync to LocalStorage
+  // ---------------------------------------------------------------------------
+  // Load data from Backend / Supabase
+  // ---------------------------------------------------------------------------
+  const refreshDbHealth = useCallback(async () => {
+    try {
+      const health = await fetchDatabaseHealth();
+      setDbHealth(health);
+    } catch (err) {
+      console.warn('Failed to fetch DB health:', err);
+    }
+  }, []);
+
+  const loadAllData = useCallback(async () => {
+    try {
+      const [fetchedTasks, fetchedProjects, fetchedOvens, health, schema] = await Promise.allSettled([
+        fetchTasks(),
+        fetchProjects(),
+        fetchOvens(),
+        fetchDatabaseHealth(),
+        fetchSchemaSql(),
+      ]);
+
+      if (fetchedTasks.status === 'fulfilled' && fetchedTasks.value.length > 0) {
+        setTasks(fetchedTasks.value);
+      }
+      if (fetchedProjects.status === 'fulfilled' && fetchedProjects.value.length > 0) {
+        setProjects(fetchedProjects.value);
+      }
+      if (fetchedOvens.status === 'fulfilled' && fetchedOvens.value.length > 0) {
+        setOvens(fetchedOvens.value);
+      }
+      if (health.status === 'fulfilled') {
+        setDbHealth(health.value);
+      }
+      if (schema.status === 'fulfilled') {
+        setSchemaSql(schema.value);
+      }
+    } catch (e) {
+      console.error('Error loading initial data from backend:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
+
+  // Sync to LocalStorage as resilient offline snapshot
   useEffect(() => {
     try {
       localStorage.setItem(LOCAL_STORAGE_TASKS_KEY, JSON.stringify(tasks));
     } catch (e) {
-      console.error('Failed to save tasks', e);
+      console.error('Failed to save tasks to local storage', e);
     }
   }, [tasks]);
 
@@ -79,37 +165,55 @@ export default function App() {
     try {
       localStorage.setItem(LOCAL_STORAGE_PROJECTS_KEY, JSON.stringify(projects));
     } catch (e) {
-      console.error('Failed to save projects', e);
+      console.error('Failed to save projects to local storage', e);
     }
   }, [projects]);
 
-  // Task Operations
-  const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus) => {
+  // ---------------------------------------------------------------------------
+  // Task Operations (Migrated to Supabase Backend)
+  // ---------------------------------------------------------------------------
+  const handleUpdateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
+    const isFinishing = newStatus === 'completed';
+    const completedAt = isFinishing ? new Date().toISOString() : undefined;
+
+    // Optimistic UI update
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id === taskId) {
-          const isFinishing = newStatus === 'completed';
           return {
             ...t,
             status: newStatus,
-            completedAt: isFinishing ? new Date().toISOString() : undefined,
+            completedAt,
           };
         }
         return t;
       })
     );
     showToast(`Task moved to ${newStatus.toUpperCase()}`);
+
+    // Persist to Supabase backend
+    try {
+      await apiUpdateTask(taskId, { status: newStatus, completedAt });
+    } catch (err) {
+      console.warn('Backend update failed, kept in local state:', err);
+    }
   };
 
-  const handleSaveTask = (taskData: Partial<BakeryTask>) => {
+  const handleSaveTask = async (taskData: Partial<BakeryTask>) => {
     if (taskData.id) {
-      // Edit existing
+      // Edit existing task
       setTasks((prev) =>
         prev.map((t) => (t.id === taskData.id ? ({ ...t, ...taskData } as BakeryTask) : t))
       );
       showToast('Batch task updated successfully');
+
+      try {
+        await apiUpdateTask(taskData.id, taskData);
+      } catch (err) {
+        console.warn('Backend update task failed:', err);
+      }
     } else {
-      // Create new
+      // Create new task
       const newTask: BakeryTask = {
         id: `task-${Date.now()}`,
         title: taskData.title || 'New Baking Task',
@@ -126,18 +230,34 @@ export default function App() {
         checklist: taskData.checklist || [],
         createdAt: new Date().toISOString(),
       };
+
       setTasks((prev) => [newTask, ...prev]);
       showToast('New baking task scheduled on floor');
+
+      try {
+        const created = await apiCreateTask(newTask);
+        if (created && created.id) {
+          setTasks((prev) => prev.map((t) => (t.id === newTask.id ? created : t)));
+        }
+      } catch (err) {
+        console.warn('Backend create task failed:', err);
+      }
     }
   };
 
-  const handleDeleteTask = (taskId: string) => {
+  const handleDeleteTask = async (taskId: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     showToast('Task removed from schedule');
+
+    try {
+      await apiDeleteTask(taskId);
+    } catch (err) {
+      console.warn('Backend delete task failed:', err);
+    }
   };
 
   // Add multiple tasks generated by AI
-  const handleAddAiSuggestedTasks = (newTasks: Array<Partial<BakeryTask>>) => {
+  const handleAddAiSuggestedTasks = async (newTasks: Array<Partial<BakeryTask>>) => {
     const formatted: BakeryTask[] = newTasks.map((t, idx) => ({
       id: `task-ai-${Date.now()}-${idx}`,
       title: t.title || 'AI Scheduled Task',
@@ -158,15 +278,32 @@ export default function App() {
 
     setTasks((prev) => [...formatted, ...prev]);
     showToast(`Added ${formatted.length} AI-generated tasks to board!`);
+
+    // Sync each to Supabase backend asynchronously
+    for (const item of formatted) {
+      try {
+        await apiCreateTask(item);
+      } catch (err) {
+        console.warn('Failed to sync AI task to Supabase:', err);
+      }
+    }
   };
 
-  // Project Operations
-  const handleSaveProject = (projectData: Partial<Project>) => {
+  // ---------------------------------------------------------------------------
+  // Project Operations (Migrated to Supabase Backend)
+  // ---------------------------------------------------------------------------
+  const handleSaveProject = async (projectData: Partial<Project>) => {
     if (projectData.id) {
       setProjects((prev) =>
         prev.map((p) => (p.id === projectData.id ? ({ ...p, ...projectData } as Project) : p))
       );
       showToast('Order details updated');
+
+      try {
+        await apiUpdateProject(projectData.id, projectData);
+      } catch (err) {
+        console.warn('Backend update project failed:', err);
+      }
     } else {
       const newProj: Project = {
         id: `proj-${Date.now()}`,
@@ -181,8 +318,18 @@ export default function App() {
         color: projectData.color || '#D97706',
         createdAt: new Date().toISOString(),
       };
+
       setProjects((prev) => [newProj, ...prev]);
       showToast('New production order created');
+
+      try {
+        const created = await apiCreateProject(newProj);
+        if (created && created.id) {
+          setProjects((prev) => prev.map((p) => (p.id === newProj.id ? created : p)));
+        }
+      } catch (err) {
+        console.warn('Backend create project failed:', err);
+      }
     }
   };
 
@@ -198,14 +345,23 @@ export default function App() {
     setIsAiDrawerOpen(true);
   };
 
-  // Reset to default data
-  const handleResetData = () => {
+  // Reset to default data & re-seed backend
+  const handleResetData = async () => {
     if (confirm('Reset to initial artisan bakery sample schedule and orders?')) {
-      setTasks(INITIAL_TASKS);
-      setProjects(INITIAL_PROJECTS);
-      localStorage.removeItem(LOCAL_STORAGE_TASKS_KEY);
-      localStorage.removeItem(LOCAL_STORAGE_PROJECTS_KEY);
-      showToast('Reset to default bakery production dataset');
+      try {
+        const res = await seedDatabase();
+        setTasks(INITIAL_TASKS);
+        setProjects(INITIAL_PROJECTS);
+        setOvens(INITIAL_OVENS);
+        localStorage.removeItem(LOCAL_STORAGE_TASKS_KEY);
+        localStorage.removeItem(LOCAL_STORAGE_PROJECTS_KEY);
+        refreshDbHealth();
+        showToast(res.message || 'Reset to default bakery production dataset');
+      } catch (err) {
+        setTasks(INITIAL_TASKS);
+        setProjects(INITIAL_PROJECTS);
+        showToast('Reset local bakery production dataset');
+      }
     }
   };
 
@@ -239,6 +395,9 @@ export default function App() {
         isAiDrawerOpen={isAiDrawerOpen}
         tasks={tasks}
         projects={projects}
+        dbHealth={dbHealth}
+        onOpenDbModal={() => setIsDbModalOpen(true)}
+        onOpenAiSearch={handleOpenAiSearch}
       />
 
       {/* Main View Container */}
@@ -290,6 +449,9 @@ export default function App() {
               setIsTaskModalOpen(true);
             }}
             onTriggerAiAction={handleTriggerAiAction}
+            onOpenAiSearch={() => handleOpenAiSearch('')}
+            appliedAiFilters={appliedAiFilters}
+            onClearAiFilters={() => setAppliedAiFilters(null)}
           />
         )}
 
@@ -345,7 +507,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Floating AI Assistant Trigger Pill (Visible on any tab when drawer is closed) */}
+      {/* Floating AI Assistant Trigger Pill */}
       {!isAiDrawerOpen && activeTab !== 'assistant' && (
         <button
           id="floating-ai-button"
@@ -396,6 +558,42 @@ export default function App() {
         onSaveProject={handleSaveProject}
       />
 
+      {/* Database Management & Supabase Schema Modal */}
+      <DatabaseModal
+        isOpen={isDbModalOpen}
+        onClose={() => setIsDbModalOpen(false)}
+        dbHealth={dbHealth}
+        onRefreshHealth={refreshDbHealth}
+        onSeedDatabase={async () => {
+          try {
+            const res = await seedDatabase();
+            await loadAllData();
+            showToast(res.message);
+          } catch (err: any) {
+            showToast(err.message || 'Seeding failed');
+          }
+        }}
+        schemaSql={schemaSql}
+      />
+
+      {/* AI-Powered Natural Language Record Search Modal */}
+      <NaturalLanguageSearchModal
+        isOpen={isAiSearchOpen}
+        onClose={() => setIsAiSearchOpen(false)}
+        tasks={tasks}
+        projects={projects}
+        initialQuery={aiSearchInitialQuery}
+        onSelectTask={(task) => {
+          setSelectedTask(task);
+          setIsTaskModalOpen(true);
+        }}
+        onSelectProject={(project) => {
+          setSelectedProject(project);
+          setIsProjectModalOpen(true);
+        }}
+        onApplyFiltersToBoard={handleApplyAiFiltersToBoard}
+      />
+
       {/* Footer */}
       <footer className="mt-auto border-t border-stone-200/80 bg-white/60 py-4 text-xs text-stone-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -406,6 +604,15 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              id="footer-database-btn"
+              onClick={() => setIsDbModalOpen(true)}
+              className="flex items-center gap-1 text-stone-700 hover:text-amber-800 text-[11px] font-medium"
+            >
+              <Database className="w-3 h-3 text-amber-600" />
+              <span>Database: {dbHealth?.connected ? 'Supabase (Connected)' : 'Supabase PostgreSQL'}</span>
+            </button>
+            <span>•</span>
             <button
               onClick={handleResetData}
               className="text-stone-600 hover:text-stone-900 flex items-center gap-1 text-[11px] hover:underline"
