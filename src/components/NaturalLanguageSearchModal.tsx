@@ -123,34 +123,34 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
   const totalResults = matchedTasks.length + matchedProjects.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-16 p-4 bg-stone-950/75 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 sm:pt-16 p-2 sm:p-4 bg-stone-950/75 backdrop-blur-xs overflow-y-auto">
       <div
         id="ai-natural-search-modal"
-        className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto sm:my-0 max-h-[92vh] flex flex-col"
       >
         {/* Modal Top Bar */}
-        <div className="px-6 py-4 bg-stone-900 text-stone-100 flex items-center justify-between border-b border-stone-800">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-stone-900 text-stone-100 flex items-center justify-between border-b border-stone-800 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold tracking-tight font-['Outfit',sans-serif]">
+                <h2 className="text-sm sm:text-base font-bold tracking-tight font-['Outfit',sans-serif]">
                   AI Record Search Assistant
                 </h2>
-                <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
+                <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 hidden xs:inline-block">
                   Gemini 3.8 Flash
                 </span>
               </div>
-              <p className="text-xs text-stone-400">
+              <p className="text-[11px] sm:text-xs text-stone-400">
                 Ask in plain English to search tasks, recipes, orders, and schedules
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
+            className="p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
             title="Close (Esc)"
           >
             <X className="w-5 h-5" />
@@ -158,7 +158,7 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
         </div>
 
         {/* Search Input Bar */}
-        <form onSubmit={handleSubmit} className="p-4 bg-stone-50 border-b border-stone-200">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4 bg-stone-50 border-b border-stone-200 shrink-0">
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -168,8 +168,8 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask e.g., 'What urgent tasks need baking?' or 'Show Sophie's croissant batches'..."
-                className="w-full bg-white text-sm text-stone-900 placeholder-stone-400 pl-10 pr-9 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-xs"
+                placeholder="Ask e.g., 'What urgent tasks need baking?'..."
+                className="w-full bg-white text-xs sm:text-sm text-stone-900 placeholder-stone-400 pl-10 pr-9 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-xs"
               />
               {query && (
                 <button
@@ -189,12 +189,12 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
               id="ai-natural-search-submit-btn"
               type="submit"
               disabled={isLoading || !query.trim()}
-              className="px-4 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-2 shrink-0 cursor-pointer"
+              className="px-3 sm:px-4 py-2.5 min-h-[40px] bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer active:scale-95 touch-manipulation"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Searching...</span>
+                  <span className="hidden sm:inline">Searching...</span>
                 </>
               ) : (
                 <>
@@ -207,8 +207,8 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
           </div>
 
           {/* Quick Suggestions Pills */}
-          <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-semibold text-stone-600 mr-1 flex items-center gap-1">
+          <div className="mt-2.5 sm:mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            <span className="text-[11px] font-semibold text-stone-600 mr-1 flex items-center gap-1 shrink-0">
               <Sparkles className="w-3 h-3 text-amber-500" />
               Try:
             </span>
@@ -217,7 +217,7 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
                 key={i}
                 type="button"
                 onClick={() => handleQuickPillClick(ex.query)}
-                className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-white hover:bg-amber-50 text-stone-700 hover:text-amber-900 border border-stone-200 hover:border-amber-300 transition-colors shadow-2xs"
+                className="text-[11px] font-medium px-2.5 py-1 min-h-[30px] rounded-lg bg-white hover:bg-amber-50 text-stone-700 hover:text-amber-900 border border-stone-200 hover:border-amber-300 transition-colors shadow-2xs shrink-0 whitespace-nowrap touch-manipulation"
               >
                 {ex.label}
               </button>
@@ -226,7 +226,7 @@ export const NaturalLanguageSearchModal: React.FC<NaturalLanguageSearchModalProp
         </form>
 
         {/* Content Area */}
-        <div className="p-6 max-h-[60vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
           {/* Loading State */}
           {isLoading && (
             <div className="py-12 text-center space-y-3">

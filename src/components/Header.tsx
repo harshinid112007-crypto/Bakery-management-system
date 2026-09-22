@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ActiveTab, BakeryTask, Project } from '../types';
 import { DatabaseHealth } from '../services/api';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -62,24 +63,24 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-stone-900 text-stone-100 border-b border-stone-800 shadow-md">
       {/* Top Banner Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-2 sm:gap-4">
           
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-500 flex items-center justify-center text-stone-950 shadow-md shadow-amber-900/30">
-              <Croissant className="w-6 h-6 stroke-[2.2]" />
+          <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0" onClick={() => setActiveTab('dashboard')}>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-500 flex items-center justify-center text-stone-950 shadow-md shadow-amber-900/30 shrink-0">
+              <Croissant className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg tracking-tight text-stone-100 font-['Outfit',sans-serif]">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-extrabold text-base sm:text-lg tracking-tight text-stone-100 font-['Outfit',sans-serif]">
                   Crumb & Crust
                 </span>
                 <span className="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
                   Bakery OS
                 </span>
               </div>
-              <p className="text-xs text-stone-400 hidden sm:block">Artisan Production & AI Manager</p>
+              <p className="text-[11px] sm:text-xs text-stone-400 hidden sm:block">Artisan Production & AI Manager</p>
             </div>
           </div>
 
@@ -123,13 +124,14 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right Status & Actions */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             {/* Mobile AI Search Button */}
             <button
               id="header-mobile-ai-search-btn"
               onClick={() => onOpenAiSearch(searchQuery)}
-              className="md:hidden flex items-center justify-center p-2 rounded-lg bg-stone-800 border border-stone-700 text-amber-400 hover:bg-stone-700 transition-colors"
+              className="md:hidden flex items-center justify-center min-w-[38px] min-h-[38px] p-2 rounded-xl bg-stone-800 border border-stone-700 text-amber-400 hover:bg-stone-700 active:scale-95 transition-all touch-manipulation"
               title="AI Record Search"
+              aria-label="Open AI Record Search"
             >
               <Sparkles className="w-4 h-4" />
             </button>
@@ -184,52 +186,71 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
 
+            {/* PWA In-App Install Button */}
+            <PWAInstallButton variant="header" />
+
             {/* AI Assistant Quick Trigger */}
             <button
               id="header-ai-assistant-btn"
               onClick={onToggleAiDrawer}
-              className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95"
+              className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-2.5 sm:px-3 py-1.5 sm:py-1.5 min-h-[38px] rounded-xl sm:rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95 touch-manipulation"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Chef Brioche AI</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="hidden xs:inline sm:inline">AI Copilot</span>
+              <span className="xs:hidden inline">AI</span>
             </button>
 
             {/* Action Buttons */}
             <button
               id="header-add-task-btn"
               onClick={onOpenNewTask}
-              className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm shadow-amber-600/30 active:scale-95"
+              className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 px-3 sm:px-3.5 py-1.5 min-h-[38px] rounded-xl sm:rounded-lg text-xs font-bold transition-all shadow-sm shadow-amber-600/30 active:scale-95 touch-manipulation shrink-0"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <Plus className="w-4 h-4 stroke-[2.5]" />
               <span className="hidden sm:inline">New Task</span>
+              <span className="sm:hidden text-xs">Task</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Search input */}
         <div className="pb-3 md:hidden">
-          <div className="relative">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search batches, breads, orders..."
-              className="w-full bg-stone-800 text-sm text-stone-200 placeholder-stone-400 pl-9 pr-8 py-1.5 rounded-lg border border-stone-700 focus:outline-none focus:border-amber-500"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-200"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+          <div className="relative flex items-center gap-1.5">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    onOpenAiSearch(searchQuery);
+                  }
+                }}
+                placeholder="Search batches, orders, or ask AI..."
+                className="w-full bg-stone-800 text-xs sm:text-sm text-stone-200 placeholder-stone-400 pl-9 pr-8 py-2 min-h-[40px] rounded-xl border border-stone-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-200 p-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => onOpenAiSearch(searchQuery)}
+              className="px-2.5 py-2 min-h-[40px] rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold shrink-0 flex items-center gap-1 active:scale-95 transition-all"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>AI</span>
+            </button>
           </div>
         </div>
 
         {/* Navigation Tabs Bar */}
-        <nav className="flex items-center space-x-1 sm:space-x-2 border-t border-stone-800/80 pt-1 overflow-x-auto no-scrollbar">
+        <nav className="flex items-center space-x-1 sm:space-x-2 border-t border-stone-800/80 pt-1 overflow-x-auto no-scrollbar scroll-smooth -mx-3 px-3 sm:mx-0 sm:px-0">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -238,23 +259,23 @@ export const Header: React.FC<HeaderProps> = ({
                 key={item.id}
                 id={`nav-tab-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-2 px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-t-lg transition-colors whitespace-nowrap border-b-2 ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2.5 sm:py-2.5 min-h-[42px] text-xs sm:text-sm font-semibold rounded-t-xl transition-colors whitespace-nowrap border-b-2 touch-manipulation ${
                   isActive
-                    ? 'border-amber-500 text-amber-400 bg-stone-800/60'
-                    : 'border-transparent text-stone-400 hover:text-stone-200 hover:bg-stone-800/30'
+                    ? 'border-amber-500 text-amber-400 bg-stone-800/80'
+                    : 'border-transparent text-stone-400 hover:text-stone-200 hover:bg-stone-800/40'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-stone-400'}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : 'text-stone-400'}`} />
                 <span>{item.label}</span>
                 {typeof item.badge === 'number' && item.badge > 0 && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                     isActive ? 'bg-amber-500 text-stone-950' : 'bg-stone-800 text-stone-400'
                   }`}>
                     {item.badge}
                   </span>
                 )}
                 {item.isAi && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping shrink-0" />
                 )}
               </button>
             );

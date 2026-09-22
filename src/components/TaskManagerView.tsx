@@ -141,7 +141,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Control Header & Filters Bar */}
-      <div className="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900 font-['Outfit',sans-serif]">
@@ -152,7 +152,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* View Switcher */}
             <div className="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200">
               <button
@@ -182,10 +182,11 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
             {/* AI Assistant Quick Generator */}
             <button
               onClick={() => onTriggerAiAction('CREATE_TASKS')}
-              className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-500/30 px-3 py-2 min-h-[38px] rounded-xl text-xs font-semibold transition-all active:scale-95 touch-manipulation"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span className="hidden sm:inline">AI Batch Plan</span>
+              <span className="sm:hidden text-xs">AI Plan</span>
             </button>
 
             {/* AI Natural Language Search */}
@@ -193,11 +194,12 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
               <button
                 id="task-manager-ai-search-btn"
                 onClick={onOpenAiSearch}
-                className="flex items-center gap-1.5 bg-amber-600/10 hover:bg-amber-600/20 text-amber-900 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                className="flex items-center gap-1.5 bg-amber-600/10 hover:bg-amber-600/20 text-amber-900 border border-amber-500/30 px-3 py-2 min-h-[38px] rounded-xl text-xs font-semibold transition-all cursor-pointer active:scale-95 touch-manipulation"
                 title="Search records with natural language"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                 <span className="hidden sm:inline">AI Search</span>
+                <span className="sm:hidden text-xs">Search</span>
               </button>
             )}
 
@@ -205,7 +207,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
             <button
               id="kanban-new-task-btn"
               onClick={() => onOpenNewTask()}
-              className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm shadow-amber-600/20"
+              className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold transition-all shadow-sm shadow-amber-600/20 active:scale-95 touch-manipulation"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Add Task</span>
@@ -224,7 +226,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
           <select
             value={selectedStation}
             onChange={(e) => setSelectedStation(e.target.value as Station | 'ALL')}
-            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium"
+            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-2 sm:py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium text-xs"
           >
             <option value="ALL">All Stations</option>
             {BAKERY_STATIONS.map((station) => (
@@ -238,7 +240,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
           <select
             value={selectedPriority}
             onChange={(e) => setSelectedPriority(e.target.value as TaskPriority | 'ALL')}
-            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium"
+            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-2 sm:py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium text-xs"
           >
             <option value="ALL">All Priorities</option>
             <option value="Urgent">🔥 Urgent</option>
@@ -251,7 +253,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
-            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium max-w-[180px] truncate"
+            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-2 sm:py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium max-w-[180px] truncate text-xs"
           >
             <option value="ALL">All Orders/Projects</option>
             {projects.map((p) => (
@@ -265,7 +267,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
           <select
             value={selectedBaker}
             onChange={(e) => setSelectedBaker(e.target.value)}
-            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium"
+            className="bg-stone-50 border border-stone-200 text-stone-700 px-2.5 py-2 sm:py-1.5 rounded-lg focus:outline-none focus:border-amber-500 font-medium text-xs"
           >
             <option value="ALL">All Bakers</option>
             {BAKERS.map((baker) => (
@@ -279,13 +281,13 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-stone-700 hover:text-stone-900 underline font-semibold px-2 py-1"
+              className="text-stone-700 hover:text-stone-900 underline font-semibold px-2 py-1.5 rounded-lg hover:bg-stone-100 transition-colors"
             >
               Reset Filters
             </button>
           )}
 
-          <div className="ml-auto text-stone-600 font-medium">
+          <div className="ml-auto text-stone-600 font-medium hidden sm:block">
             Showing {filteredTasks.length} of {tasks.length} tasks
           </div>
         </div>
@@ -321,14 +323,15 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
 
       {/* View Mode: Kanban */}
       {viewMode === 'kanban' ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+        <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-4 min-w-[1100px] xl:min-w-0 xl:grid xl:grid-cols-5 items-start">
           {COLUMNS.map((col) => {
             const colTasks = filteredTasks.filter((t) => t.status === col.id);
 
             return (
               <div
                 key={col.id}
-                className="bg-stone-100/70 rounded-2xl p-3 border border-stone-200/80 flex flex-col min-h-[500px]"
+                className="bg-stone-100/70 rounded-2xl p-3 border border-stone-200/80 flex flex-col min-h-[480px] w-72 shrink-0 xl:w-auto"
               >
                 {/* Column Header */}
                 <div className={`border-t-4 ${col.color} bg-white rounded-xl p-3 shadow-2xs mb-3`}>
@@ -485,6 +488,7 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
               </div>
             );
           })}
+          </div>
         </div>
       ) : (
         /* View Mode: List / Table */
@@ -493,14 +497,14 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
             <table className="w-full text-left text-xs sm:text-sm">
               <thead className="bg-stone-50 border-b border-stone-200 text-stone-700 uppercase font-bold text-[11px] tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Task & Description</th>
-                  <th className="py-3 px-4">Station</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Due Time</th>
-                  <th className="py-3 px-4">Assigned Baker</th>
-                  <th className="py-3 px-4">Checklist</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-3 sm:px-4">Task & Description</th>
+                  <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Station</th>
+                  <th className="py-3 px-3 sm:px-4">Priority</th>
+                  <th className="py-3 px-3 sm:px-4">Status</th>
+                  <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Due Time</th>
+                  <th className="py-3 px-3 sm:px-4 hidden lg:table-cell">Assigned Baker</th>
+                  <th className="py-3 px-3 sm:px-4 hidden xl:table-cell">Checklist</th>
+                  <th className="py-3 px-3 sm:px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -524,25 +528,33 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
                           isDone ? 'bg-stone-50/40 opacity-75' : ''
                         }`}
                       >
-                        <td className="py-3.5 px-4 max-w-xs">
-                          <div className="font-bold text-stone-900 truncate">{task.title}</div>
-                          <div className="text-stone-600 text-xs truncate mt-0.5">
+                        <td className="py-3.5 px-3 sm:px-4 max-w-xs">
+                          <div className="font-bold text-stone-900 truncate text-xs sm:text-sm">{task.title}</div>
+                          <div className="text-stone-600 text-[11px] sm:text-xs truncate mt-0.5">
                             {task.description}
                           </div>
+                          <div className="flex items-center gap-2 mt-1 sm:hidden">
+                            <span className="bg-stone-100 text-stone-700 px-1.5 py-0.2 rounded text-[10px] font-semibold">
+                              {task.station}
+                            </span>
+                            <span className="text-[10px] text-amber-800 font-medium">
+                              {task.dueTime}
+                            </span>
+                          </div>
                           {task.quantity && (
-                            <span className="text-[11px] text-amber-800 font-medium">
+                            <span className="text-[11px] text-amber-800 font-medium hidden sm:inline-block">
                               Qty: {task.quantity}
                             </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap hidden sm:table-cell">
                           <span className="bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md text-xs font-semibold">
                             {task.station}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap">
                           <span
-                            className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+                            className={`px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold ${
                               task.priority === 'Urgent'
                                 ? 'bg-rose-100 text-rose-800'
                                 : task.priority === 'High'
@@ -555,36 +567,36 @@ export const TaskManagerView: React.FC<TaskManagerViewProps> = ({
                             {task.priority}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap">
                           <select
                             value={task.status}
                             onClick={(e) => e.stopPropagation()}
                             onChange={(e) => onUpdateTaskStatus(task.id, e.target.value as TaskStatus)}
-                            className="bg-stone-50 border border-stone-200 text-stone-800 rounded-md px-2 py-1 text-xs font-semibold"
+                            className="bg-stone-50 border border-stone-200 text-stone-800 rounded-md px-1.5 sm:px-2 py-1 text-[11px] sm:text-xs font-semibold max-w-[110px] sm:max-w-none"
                           >
-                            <option value="prep">Prep & Doughs</option>
+                            <option value="prep">Prep</option>
                             <option value="proofing">Proofing</option>
                             <option value="baking">In Oven</option>
                             <option value="finishing">Finishing</option>
-                            <option value="completed">Completed</option>
+                            <option value="completed">Done</option>
                           </select>
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap font-medium text-stone-800">
+                        <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap font-medium text-stone-800 hidden md:table-cell">
                           {task.dueTime}
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap text-stone-700">
+                        <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap text-stone-700 hidden lg:table-cell">
                           {task.assignedBaker}
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap text-stone-700">
+                        <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap text-stone-700 hidden xl:table-cell">
                           {checklistTotal > 0 ? `${checklistDone}/${checklistTotal}` : '—'}
                         </td>
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <td className="py-3.5 px-3 sm:px-4 text-right whitespace-nowrap">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onUpdateTaskStatus(task.id, isDone ? 'prep' : 'completed');
                             }}
-                            className={`p-1.5 rounded-lg border transition-colors ${
+                            className={`p-2 min-w-[36px] min-h-[36px] rounded-lg border transition-colors flex items-center justify-center ml-auto touch-manipulation active:scale-95 ${
                               isDone
                                 ? 'bg-emerald-600 text-white border-emerald-600'
                                 : 'border-stone-300 hover:border-emerald-600 text-stone-600 hover:text-emerald-600'

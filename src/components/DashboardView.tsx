@@ -85,46 +85,46 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner & Date Welcome */}
-      <div className="bg-stone-900 rounded-2xl p-6 border border-stone-800 text-stone-100 shadow-sm relative overflow-hidden">
+      <div className="bg-stone-900 rounded-2xl p-4 sm:p-6 border border-stone-800 text-stone-100 shadow-sm relative overflow-hidden">
         <div className="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-amber-600/10 to-transparent pointer-events-none" />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 Live Floor Operations
               </span>
               <span className="text-xs text-stone-400">Shift: 04:00 - 12:30 AM</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-100 font-['Outfit',sans-serif]">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-stone-100 font-['Outfit',sans-serif]">
               Morning Artisan Bake Shift
             </h1>
-            <p className="text-sm text-stone-400 mt-1 max-w-xl">
+            <p className="text-xs sm:text-sm text-stone-400 mt-1 max-w-xl">
               Stone deck ovens at operating temp. 2 wholesale orders in packaging, proofing cabinets calibrated.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <button
               onClick={() => onTriggerAiAction('PRIORITIZE')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 text-xs font-semibold transition-all hover:border-amber-500/40 shadow-sm"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-3.5 py-2.5 sm:py-2 min-h-[40px] rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 text-xs font-semibold transition-all hover:border-amber-500/40 shadow-sm active:scale-95 touch-manipulation"
             >
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>Prioritize Ovens</span>
             </button>
 
             <button
               onClick={() => onTriggerAiAction('CREATE_TASKS')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold transition-all shadow-sm"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-3.5 py-2.5 sm:py-2 min-h-[40px] rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold transition-all shadow-sm active:scale-95 touch-manipulation"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>AI Batch Generator</span>
             </button>
 
             <button
               onClick={onOpenNewTask}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-sm shadow-amber-500/20"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 min-h-[40px] rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-sm shadow-amber-500/20 active:scale-95 touch-manipulation"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>New Task</span>
@@ -134,22 +134,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Shift Progress */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">Production Pace</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <span className="text-[11px] sm:text-xs font-bold text-stone-700 uppercase tracking-wider">Production Pace</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
+          <div className="mt-3 sm:mt-4">
+            <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+              <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
                 {progressPercent}%
               </span>
-              <span className="text-xs font-medium text-stone-600">
-                ({completedTasks.length}/{tasks.length} tasks)
+              <span className="text-[11px] sm:text-xs font-medium text-stone-600">
+                ({completedTasks.length}/{tasks.length})
               </span>
             </div>
             <div className="w-full h-2 bg-stone-100 rounded-full mt-2 overflow-hidden">
@@ -162,66 +162,66 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Card 2: Active Ovens */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">Ovens & Chambers</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+            <span className="text-[11px] sm:text-xs font-bold text-stone-700 uppercase tracking-wider">Ovens & Chambers</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
               <Flame className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
+          <div className="mt-3 sm:mt-4">
+            <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+              <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
                 {ovens.filter(o => o.status === 'active').length}/{ovens.length}
               </span>
-              <span className="text-xs font-medium text-stone-600">Active Units</span>
+              <span className="text-[11px] sm:text-xs font-medium text-stone-600">Active</span>
             </div>
-            <p className="text-xs text-stone-600 mt-2 truncate">
-              {activeBaking.length} batches currently baking
+            <p className="text-[11px] sm:text-xs text-stone-600 mt-2 truncate">
+              {activeBaking.length} baking
             </p>
           </div>
         </div>
 
         {/* Card 3: Urgent Priority Alerts */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">Urgent Priorities</span>
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+            <span className="text-[11px] sm:text-xs font-bold text-stone-700 uppercase tracking-wider">Urgent</span>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
               urgentTasks.length > 0 ? 'bg-rose-50 text-rose-700' : 'bg-stone-50 text-stone-500'
             }`}>
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
+          <div className="mt-3 sm:mt-4">
+            <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+              <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
                 {urgentTasks.length}
               </span>
-              <span className="text-xs font-medium text-stone-600">Requiring Action</span>
+              <span className="text-[11px] sm:text-xs font-medium text-stone-600">Action</span>
             </div>
-            <p className="text-xs text-rose-600 font-medium mt-2 truncate">
-              {urgentTasks.length > 0 ? `${urgentTasks[0].title.slice(0, 24)}...` : 'No urgent bottlenecks'}
+            <p className="text-[11px] sm:text-xs text-rose-600 font-medium mt-2 truncate">
+              {urgentTasks.length > 0 ? `${urgentTasks[0].title.slice(0, 20)}...` : 'No bottlenecks'}
             </p>
           </div>
         </div>
 
         {/* Card 4: Orders in Production */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-stone-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">Active Orders</span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+            <span className="text-[11px] sm:text-xs font-bold text-stone-700 uppercase tracking-wider">Active Orders</span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
               <Package className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
+          <div className="mt-3 sm:mt-4">
+            <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+              <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-900 font-['Outfit',sans-serif]">
                 {projects.filter(p => p.status === 'in_progress').length}
               </span>
-              <span className="text-xs font-medium text-stone-600">In Production</span>
+              <span className="text-[11px] sm:text-xs font-medium text-stone-600">Orders</span>
             </div>
-            <p className="text-xs text-stone-600 mt-2 truncate">
-              ~{totalUnits} units scheduled today
+            <p className="text-[11px] sm:text-xs text-stone-600 mt-2 truncate">
+              ~{totalUnits} units today
             </p>
           </div>
         </div>

@@ -43,30 +43,40 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Header Banner */}
-      <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
-              Wholesale & Event Contracts
-            </span>
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-stone-200 shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
+                Wholesale & Event Contracts
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900 font-['Outfit',sans-serif]">
+              Production Orders & Projects
+            </h1>
+            <p className="text-xs text-stone-600 mt-0.5">
+              Track wholesale agreements, tiered event cakes, and scheduled retail market drops.
+            </p>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900 font-['Outfit',sans-serif]">
-            Production Orders & Projects
-          </h1>
-          <p className="text-xs text-stone-600 mt-0.5">
-            Track wholesale agreements, tiered event cakes, and scheduled retail market drops.
-          </p>
+
+          <button
+            onClick={onOpenNewProject}
+            className="flex items-center justify-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 px-3.5 py-2.5 sm:py-2 min-h-[40px] rounded-xl text-xs font-bold transition-all shadow-sm shadow-amber-600/20 active:scale-95 touch-manipulation self-start md:self-auto shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>New Order / Project</span>
+          </button>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Status filter buttons */}
-          <div className="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 text-xs">
+        {/* Status filter buttons */}
+        <div className="pt-3 border-t border-stone-100 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-xl border border-stone-200 text-xs w-max">
             {['ALL', 'in_progress', 'scheduled', 'review', 'completed'].map((statusKey) => (
               <button
                 key={statusKey}
                 onClick={() => setSelectedStatus(statusKey)}
-                className={`px-3 py-1.5 rounded-lg font-semibold capitalize transition-all ${
+                className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold capitalize transition-all whitespace-nowrap touch-manipulation ${
                   selectedStatus === statusKey
                     ? 'bg-white text-stone-900 shadow-xs'
                     : 'text-stone-700 hover:text-stone-900'
@@ -76,14 +86,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               </button>
             ))}
           </div>
-
-          <button
-            onClick={onOpenNewProject}
-            className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm shadow-amber-600/20"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>New Order / Project</span>
-          </button>
         </div>
       </div>
 

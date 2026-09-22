@@ -170,10 +170,10 @@ export const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
 
   return (
     <div
-      className={`fixed bottom-4 right-4 z-50 bg-white rounded-2xl shadow-2xl border border-stone-300 flex flex-col transition-all duration-300 overflow-hidden ${
+      className={`fixed z-50 bg-white rounded-2xl shadow-2xl border border-stone-300 flex flex-col transition-all duration-300 overflow-hidden ${
         isExpanded
-          ? 'w-[calc(100vw-2rem)] max-w-2xl h-[85vh]'
-          : 'w-[calc(100vw-2rem)] sm:w-[420px] h-[560px]'
+          ? 'inset-2 sm:inset-auto sm:bottom-4 sm:right-4 sm:w-[calc(100vw-2rem)] sm:max-w-2xl sm:h-[85vh]'
+          : 'bottom-2 right-2 left-2 sm:left-auto sm:bottom-4 sm:right-4 sm:w-[420px] h-[80vh] sm:h-[560px] max-h-[640px]'
       }`}
     >
       {/* Header */}

@@ -35,35 +35,35 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
   const isConfigured = dbHealth?.configured ?? false;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-950/70 backdrop-blur-xs overflow-y-auto">
       <div
         id="database-management-modal"
-        className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-4 sm:my-8 max-h-[95vh] flex flex-col"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-stone-900 text-stone-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <Database className="w-5 h-5" />
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-stone-900 text-stone-100 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+              <Database className="w-4 sm:w-5 h-4 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold tracking-tight">Supabase PostgreSQL Backend</h2>
-              <p className="text-xs text-stone-400">Database migration & table synchronization</p>
+              <h2 className="text-sm sm:text-base font-bold tracking-tight">Supabase PostgreSQL Backend</h2>
+              <p className="text-[11px] sm:text-xs text-stone-400">Database migration & table synchronization</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
+            className="p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Sub-tab Navigation */}
-        <div className="flex border-b border-stone-200 bg-stone-50 px-6 pt-2">
+        <div className="flex border-b border-stone-200 bg-stone-50 px-3 sm:px-6 pt-2 overflow-x-auto no-scrollbar shrink-0">
           <button
             onClick={() => setActiveSubTab('status')}
-            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors flex items-center gap-1.5 ${
+            className={`px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap touch-manipulation ${
               activeSubTab === 'status'
                 ? 'border-amber-600 text-amber-700 bg-white'
                 : 'border-transparent text-stone-600 hover:text-stone-900'
@@ -74,7 +74,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
           </button>
           <button
             onClick={() => setActiveSubTab('schema')}
-            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors flex items-center gap-1.5 ${
+            className={`px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap touch-manipulation ${
               activeSubTab === 'schema'
                 ? 'border-amber-600 text-amber-700 bg-white'
                 : 'border-transparent text-stone-600 hover:text-stone-900'
@@ -86,12 +86,12 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
           {activeSubTab === 'status' && (
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               {/* Connection Status Card */}
               <div
-                className={`p-4 rounded-xl border flex items-start gap-3.5 ${
+                className={`p-3.5 sm:p-4 rounded-xl border flex items-start gap-3 sm:gap-3.5 ${
                   isConnected
                     ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
                     : isConfigured
@@ -105,9 +105,9 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
                   <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 text-xs leading-relaxed">
-                  <div className="flex items-center justify-between font-bold text-sm mb-1">
+                  <div className="flex flex-wrap items-center justify-between font-bold text-xs sm:text-sm mb-1 gap-1">
                     <span>{isConnected ? 'Connected to Supabase PostgreSQL' : isConfigured ? 'Supabase Credentials Found' : 'Operating in Safe Local Cache Mode'}</span>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-white/80 border border-current">
+                    <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded-md bg-white/80 border border-current">
                       {dbHealth?.database || 'PostgreSQL'}
                     </span>
                   </div>
@@ -120,32 +120,32 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
                 <h3 className="text-xs font-bold uppercase tracking-wider text-stone-600 mb-2">
                   Database Tables & Row Counts
                 </h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-center">
                     <span className="text-[11px] font-semibold text-stone-600 uppercase tracking-wide block">
                       public.tasks
                     </span>
-                    <span className="text-xl font-extrabold text-stone-900 mt-1 block">
+                    <span className="text-lg sm:text-xl font-extrabold text-stone-900 mt-1 block">
                       {dbHealth?.tables.tasks ?? 0}
                     </span>
                     <span className="text-[10px] text-stone-600">Bakery tasks</span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-center">
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-center">
                     <span className="text-[11px] font-semibold text-stone-600 uppercase tracking-wide block">
                       public.projects
                     </span>
-                    <span className="text-xl font-extrabold text-stone-900 mt-1 block">
+                    <span className="text-lg sm:text-xl font-extrabold text-stone-900 mt-1 block">
                       {dbHealth?.tables.projects ?? 0}
                     </span>
                     <span className="text-[10px] text-stone-600">Wholesale orders</span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-center">
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-center">
                     <span className="text-[11px] font-semibold text-stone-600 uppercase tracking-wide block">
                       public.ovens
                     </span>
-                    <span className="text-xl font-extrabold text-stone-900 mt-1 block">
+                    <span className="text-lg sm:text-xl font-extrabold text-stone-900 mt-1 block">
                       {dbHealth?.tables.ovens ?? 0}
                     </span>
                     <span className="text-[10px] text-stone-600">Ovens telemetry</span>
@@ -165,10 +165,10 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
                 <button
                   onClick={onRefreshHealth}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 min-h-[38px] rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors active:scale-95 touch-manipulation"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Re-check Connection</span>
@@ -176,7 +176,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
 
                 <button
                   onClick={onSeedDatabase}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-colors shadow-sm"
+                  className="flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-colors shadow-sm active:scale-95 touch-manipulation"
                 >
                   <span>Sync Initial Dataset to Supabase</span>
                 </button>

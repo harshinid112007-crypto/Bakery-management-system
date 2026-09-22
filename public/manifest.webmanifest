@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Bakery Manager",
+  "short_name": "BakeryOps",
+  "description": "Modern AI-powered bakery operations and production management application with intelligent task organization, order tracking, and shift analytics.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#b45309",
+  "background_color": "#fef3c7",
+  "categories": ["productivity", "business", "food"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

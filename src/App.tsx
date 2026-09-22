@@ -10,6 +10,7 @@ import { TaskModal } from './components/TaskModal';
 import { ProjectModal } from './components/ProjectModal';
 import { DatabaseModal } from './components/DatabaseModal';
 import { NaturalLanguageSearchModal } from './components/NaturalLanguageSearchModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { ActiveTab, BakeryTask, Project, OvenStatus, TaskStatus, NaturalLanguageSearchFilter } from './types';
 import { INITIAL_TASKS, INITIAL_PROJECTS, INITIAL_OVENS, BAKERS } from './data/initialData';
 import {
@@ -401,7 +402,7 @@ export default function App() {
       />
 
       {/* Main View Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         {activeTab === 'dashboard' && (
           <DashboardView
             tasks={tasks}
@@ -512,9 +513,9 @@ export default function App() {
         <button
           id="floating-ai-button"
           onClick={() => setIsAiDrawerOpen(true)}
-          className="fixed bottom-6 right-6 z-40 bg-stone-900 hover:bg-stone-800 text-stone-100 px-4 py-3 rounded-2xl shadow-xl border border-stone-700 flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 group"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-stone-900 hover:bg-stone-800 text-stone-100 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-xl border border-stone-700 flex items-center gap-2 sm:gap-2.5 transition-all hover:scale-105 active:scale-95 group touch-manipulation"
         >
-          <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-stone-950 font-bold group-hover:rotate-12 transition-transform">
+          <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-stone-950 font-bold group-hover:rotate-12 transition-transform shrink-0">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div className="text-left">
@@ -593,6 +594,9 @@ export default function App() {
         }}
         onApplyFiltersToBoard={handleApplyAiFiltersToBoard}
       />
+
+      {/* Offline Connectivity Status Pill */}
+      <OfflineIndicator />
 
       {/* Footer */}
       <footer className="mt-auto border-t border-stone-200/80 bg-white/60 py-4 text-xs text-stone-600">

@@ -75,12 +75,12 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-2xl max-w-lg w-full overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl border border-stone-200 shadow-2xl max-w-lg w-full overflow-hidden my-4 sm:my-8 max-h-[95vh] flex flex-col">
         {/* Header */}
-        <div className="bg-stone-900 text-stone-100 px-6 py-4 flex items-center justify-between border-b border-stone-800">
+        <div className="bg-stone-900 text-stone-100 px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between border-b border-stone-800 shrink-0">
           <div className="flex items-center gap-2">
-            <FolderKanban className="w-5 h-5 text-amber-500" />
+            <FolderKanban className="w-5 h-5 text-amber-500 shrink-0" />
             <div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400">
                 {project ? 'Update Order / Contract' : 'Create Production Order'}
@@ -92,14 +92,14 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800"
+            className="p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs sm:text-sm">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs sm:text-sm overflow-y-auto flex-1">
           <div>
             <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">
               Order / Project Name *
