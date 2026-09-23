@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { BakeryTask, Project, OvenStatus } from '../src/types';
-import { INITIAL_TASKS, INITIAL_PROJECTS, INITIAL_OVENS } from '../src/data/initialData';
+import type { BakeryTask, Project, OvenStatus } from '../src/types.ts';
+import { INITIAL_TASKS, INITIAL_PROJECTS, INITIAL_OVENS } from '../src/data/initialData.ts';
 
 // In-memory operational cache for ultra-fast response & offline fallback
 let localTasks: BakeryTask[] = [...INITIAL_TASKS];

@@ -1,10 +1,11 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
-import type { BakeryTask, Project } from "./src/types";
+import type { BakeryTask, Project } from "./src/types.ts";
 import {
   getProjects,
   createProject,
@@ -19,12 +20,12 @@ import {
   seedDatabase,
   getDatabaseHealth,
   isSupabaseConfigured,
-} from "./server/supabase";
+} from "./server/supabase.ts";
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: "10mb" }));
 

@@ -1,4 +1,4 @@
-import { BakeryTask, Project, OvenStatus } from '../types';
+import type { BakeryTask, Project, OvenStatus } from '../types.ts';
 
 export const INITIAL_PROJECTS: Project[] = [
   {
